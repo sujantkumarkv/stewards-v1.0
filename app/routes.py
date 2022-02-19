@@ -1,8 +1,7 @@
 from app import app
 from app.preprocess import preprocess
 from app.helpers.helpers import get_proposals
-
-from flask.templating import render_template
+from flask import render_template
 
 initial_list = preprocess()
 
