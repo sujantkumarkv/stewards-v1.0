@@ -24,11 +24,11 @@ def getKarmaDataStats(EthAddress, timeVal, variableName):
                                
 def checkStewardPosition(EthAddress):
     for steward in githubData:
-        if steward["address"] == EthAddress and steward["workstream"]!= "":
+        if steward["address"].lower() == EthAddress.lower() and steward["workstream"]!= "":
             if (steward["workstream"].split(" ")[1]).lower() == "lead":
                 return 5 #w value then is used as 5 for score calculation
             elif (steward["workstream"].split(" ")[1]).lower() == "contributor":
-                return 3 #w value then is used as 5 for score calculation
+                return 3 #w value then is used as 5 for score calculation   
     return 0
         
 
@@ -42,8 +42,8 @@ def getHealthScore(EthAddress, timeVal):
     """
     W= checkStewardPosition(EthAddress=EthAddress)
     score= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.7 + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated"))*1.1 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed"))*0.60 + W
-    health_score= min(score, 10) #as we are rating out of 10
-    return health_score
+    #as we are rating out of 10
+    return min(score, 10)
     
     
 def preprocess():
@@ -56,30 +56,32 @@ def preprocess():
     #else:      
     stewards_data= []  
     for steward in githubData:
-        steward_data= {
-                "name": steward["name"],
-                "address": steward["address"],
-                "profile_image": steward["image"],
-                "workstream": steward["workstream"],
-                "gitcoin_username": steward["handle_gitcoin"],
-                "discourse_username": steward["handle_forum"],
-                "steward_since": steward["steward_since"],
-                "statement_post": f"https://gov.gitcoin.co/t/introducing-stewards-governance/41/{steward['statement_post_id']}",
-                "forum_activity_30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
-                "forum_activity_lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumTopicCount")),
-                "vote_participation_30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),
-                "vote_participation_lifetime": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="offChainVotesPct"),
-                "voting_weight": steward["votingweight"],
-                "snapshot_votes": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"),
-                "health_score_30d": getHealthScore(EthAddress=steward['address'], timeVal='30d'),
-                "health_score_lifetime": getHealthScore(EthAddress=steward['address'], timeVal='lifetime'),
-            }
-        stewards_data.append(steward_data)
-    
+        if (steward["name"]=="Pet3r" or steward["name"]=="Accelerated Capital") == False:
+            steward_data= {
+                    "name": steward["name"],
+                    "address": steward["address"],
+                    "profile_image": steward["image"],
+                    "workstream": steward["workstream"],
+                    "gitcoin_username": steward["handle_gitcoin"],
+                    "discourse_username": steward["handle_forum"],
+                    "steward_since": steward["steward_since"],
+                    "statement_post": f"https://gov.gitcoin.co/t/introducing-stewards-governance/41/{steward['statement_post_id']}",
+                    "forum_activity_30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
+                    "forum_activity_lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumTopicCount")),
+                    "vote_participation_30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),
+                    "vote_participation_lifetime": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="offChainVotesPct"),
+                    "voting_weight": steward["votingweight"],
+                    "snapshot_votes": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"),
+                    "health_score_30d": getHealthScore(EthAddress=steward['address'], timeVal='30d'),
+                    "health_score_lifetime": getHealthScore(EthAddress=steward['address'], timeVal='lifetime'),
+                }
+            stewards_data.append(steward_data)
+        else: continue #Karma returns None for those stewards, thus ...
     #snapshot_proposals.change(length_proposals)
     
     return stewards_data
 
-
-
+for steward in githubData:
+    if (steward["name"]=="Pet3r" or steward["name"]=="Accelerated Capital") == False:
+        print(getHealthScore(EthAddress=steward["address"], timeVal="30d"))
     

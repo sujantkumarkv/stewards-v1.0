@@ -1,4 +1,4 @@
 from app import app
-from app.routes import index
+from app import routes
 
 app.run(debug=True)

@@ -1,9 +1,8 @@
 from app import app
 from app.preprocess import preprocess
-from app.helpers.helpers import get_proposals
 from flask import render_template
 
-initial_list = preprocess()
+stewards_data = preprocess()
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -14,4 +13,4 @@ def index():
     #    initial_list, number_prop = preprocess()
     
 
-    return render_template("index.html", stewards=initial_list)
+    return render_template("index.html", stewards_data=stewards_data)
