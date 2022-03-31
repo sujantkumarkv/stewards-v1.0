@@ -179,11 +179,11 @@ section.grid {
 .card .head .user .name {
   font-weight: 800;
 }
-.card .head .user .gitcoinhandle a {
+.card .head .user .gitcoinusername a {
   color: var(--teal);
   text-decoration: none;
 }
-.card .head .user .gitcoinhandle a:hover {
+.card .head .user .gitcoinusername a:hover {
   color: var(--teal);
 }
 .card .head .health {
@@ -270,7 +270,7 @@ section#gitcoindao a {
 
 .ui {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   margin: 0em 2em;
   gap: 1em;
 }

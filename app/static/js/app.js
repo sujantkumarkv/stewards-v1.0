@@ -1,14 +1,15 @@
+const fs= require("fs")
 window.addEventListener("load", (event) => {
-  window.stewards = [];
+  window.stewards_data = fs.readFile("../static/json/stewards_data.json")
   window.workstreams = [];
 
   cachbuster = new Date().getTime();
 
   Promise.all([
-    fetch("assets/json/workstreams.json?" + cachbuster).then((value) =>
+    fetch("static/json/workstreams.json?" + cachbuster).then((value) =>
       value.json()
     ),
-    fetch("assets/json/data.json?" + cachbuster).then((value) => value.json()),
+    fetch("static/json/stewards_data.json?" + cachbuster).then((value) => value.json()),
   ])
     .then((value) => {
       window.workstreams = value[0];
@@ -131,7 +132,7 @@ function orderStewards() {
 function draw() {
   // console.log(window.stewards)
 
-  imgpath = "assets/stewards/";
+  imgpath = "static/stewards/";
   gitcoinurl = "https://gitcoin.co/";
 
   grid = document.querySelector("#grid");
@@ -181,7 +182,7 @@ function draw() {
     clone.querySelector("#steward_since_url").href = statement_url;
 
     clone.querySelector("#health").src =
-      "assets/images/health_" + steward.health + ".svg";
+      "static/images/health_" + steward.health + ".svg";
 
     clone.querySelector("#health_num").innerHTML = `${steward.health}/10`;
 

@@ -41,8 +41,10 @@ def getHealthScore(EthAddress, timeVal):
     finalScore = Min(score, 10)
     """
     W= checkStewardPosition(EthAddress=EthAddress)
-    score= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.7 + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated"))*1.1 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed"))*0.60 + W
-    health_score= min(score, 10) #as we are rating out of 10
+    score= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.7 \
+            + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 \
+                + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated"))*1.1 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed"))*0.60 + W
+    health_score= int(min(score, 10)) #as we are rating out of 10
     return health_score
     
     
@@ -77,6 +79,10 @@ def preprocess():
         stewards_data.append(steward_data)
     
     #snapshot_proposals.change(length_proposals)
+    # the json file where the output must be stored 
+    output_file = open("app/static/json/stewards_data.json", "w")      
+    json.dump(stewards_data, output_file, indent = 6)     
+    output_file.close()
     
     return stewards_data
 

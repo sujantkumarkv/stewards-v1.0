@@ -10,7 +10,11 @@
       href="https://fonts.googleapis.com/css2?family=Poppins&family=Space+Mono&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}"/>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/app.css') }}"
+    />
     <meta name="robots" content="index,follow" />
     <meta name="audience" content="Alle" />
     <meta name="revisit-after" content="7 days" />
@@ -111,8 +115,8 @@
             <img
               id="image"
               loading="lazy"
-              src='../static/images/stewards/{{ steward["profile_image"] }}'
-              alt="steward pfp"
+              src='../static/images/stewards/{{ steward["image"] }}'
+              alt=""
             />
           </figure>
           <div class="user truncate">
@@ -131,7 +135,7 @@
             <h2>{{ steward["health_score_30d"] }}/10</h2>
             <img
               id="health"
-              src='../static/images/health_{{ steward["health_score_30d"] }}.svg'
+              src='../static/images/health_{{ steward["Health_Score"] }}.svg'
             />
           </div>
         </div>
@@ -157,7 +161,7 @@
             </div>
           </div>
 
-          <!-- forum activity -->
+          <!-- forum post -->
           <div class="row">
             <div class="icon">
               <img src="../static/images/forum.svg" />
@@ -183,15 +187,11 @@
               <a href="http://gitcoindao.com" target="_blank">Workstream</a>
             </div>
             <div class="value truncate">
-              <a id="workstream_url" href="#" target="_blank">
-                <span id="workstream_name" class="workstream_name">
-                  {% if steward['workstream'] %}
-                    {{ steward['workstream'] }}
-                  {% else %}
-                      General
-                  {% endif %}
-                </span>
-              </a>
+              <a id="workstream_url" href="#" target="_blank"
+                ><span id="workstream_name" class="workstream_name"
+                  >{{ steward['workstream'] }}</span
+                ></a
+              >
             </div>
           </div>
 
@@ -210,7 +210,9 @@
             </div>
             <div class="value truncate">
               <span id="votingweight" class="percentage">
-                {{ steward['voting_weight'] }}
+                <!-- {% if steward["votingweight"] == "nan" %} N/A {% else %} {{
+                steward["votingweight"] }}% {% endif %} -->
+                N/A
               </span>
             </div>
           </div>
@@ -227,7 +229,9 @@
             </div>
             <div class="value truncate">
               <span id="participation_snapshot" class="percentage">
-                {{ steward['vote_participation_30d'] }}
+                <!-- {% if steward["voteparticipation"] == "nan" %} N/A {% else %} {{
+                steward["voteparticipation"] }}% {% endif %} -->
+                N/A
               </span>
             </div>
           </div>
@@ -246,7 +250,9 @@
             id="delegate_button"
             class="btn truncate teal"
             target="_blank"
-            href='https://www.withtally.com/voter/{{ steward["address"] }}/governance/gitcoin'>Delegate</a>
+            href='https://www.withtally.com/voter/{{ steward["address"] }}/governance/gitcoin'
+            >Delegate</a
+          >
         </div>
       </div>
       {% endfor %}
