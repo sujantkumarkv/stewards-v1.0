@@ -2,7 +2,6 @@ import os
 import requests
 import json
 import time
-import numpy as np
 #from app.helpers.helpers import get_proposals
 #from app.helpers.proposals import proposals
 
@@ -79,7 +78,7 @@ def preprocess():
     
     #snapshot_proposals.change(length_proposals)
     # the json file where the output must be stored 
-    output_file = open("app/static/json/stewards_data.json", "w")      
+    output_file = open("static/json/stewards_data.json", "w")      
     json.dump(stewards_data, output_file, indent = 6)     
     output_file.close()
     

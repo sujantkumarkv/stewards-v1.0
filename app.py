@@ -1,7 +1,8 @@
-from app import app
-from app.preprocess import preprocess
-from flask import render_template
+from preprocess import preprocess
+from flask import Flask, render_template
 import gunicorn
+
+app = Flask(__name__)
 
 stewards_data = preprocess()
 
