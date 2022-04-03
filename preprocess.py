@@ -54,7 +54,7 @@ def preprocess():
     #    return stewards_data
 
     #else:      
-    stewards_data= []  
+    data= []  
     for steward in githubData:
         steward_data= {
                 "name": steward["name"],
@@ -65,16 +65,23 @@ def preprocess():
                 "discourse_username": steward["handle_forum"],
                 "steward_since": steward["steward_since"],
                 "statement_post": f"https://gov.gitcoin.co/t/introducing-stewards-governance/41/{steward['statement_post_id']}",
-                "forum_activity_30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
-                "forum_activity_lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumTopicCount")),
-                "vote_participation_30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),
-                "vote_participation_lifetime": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="offChainVotesPct"),
+                "forum_activity": {
+                    "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount",) + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
+                    "lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumTopicCount")),
+                    }, 
+                "vote_participation": {
+                    "30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),
+                    "lifetime": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="offChainVotesPct"),
+                    },
                 "voting_weight": steward["votingweight"],
                 "snapshot_votes": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"),
-                "health_score_30d": getHealthScore(EthAddress=steward['address'], timeVal='30d'),
-                "health_score_lifetime": getHealthScore(EthAddress=steward['address'], timeVal='lifetime'),
+                "health": {
+                    "30d": getHealthScore(EthAddress=steward['address'], timeVal='30d'), 
+                    "lifetime": getHealthScore(EthAddress=steward['address'], timeVal='lifetime'), 
+                    }, 
             }
-        stewards_data.append(steward_data)
+        data.append(steward_data)
+        stewards_data= {"data": data}
     
     #snapshot_proposals.change(length_proposals)
     # the json file where the output must be stored 

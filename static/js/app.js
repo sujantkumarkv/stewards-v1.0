@@ -1,19 +1,20 @@
-const fs= require("fs")
-window.addEventListener("load", (event) => {
-  window.stewards_data = fs.readFile("../static/json/stewards_data.json")
+
+
+  window.addEventListener("load", (event) => {
+  window.stewards = [];
   window.workstreams = [];
 
   cachbuster = new Date().getTime();
 
   Promise.all([
-    fetch("static/json/workstreams.json?" + cachbuster).then((value) =>
+    fetch("static/json/workstreams.json").then((value) =>
       value.json()
     ),
-    fetch("static/json/stewards_data.json?" + cachbuster).then((value) => value.json()),
+    fetch("static/json/stewards_data.json").then((value) => value.json()),
   ])
     .then((value) => {
       window.workstreams = value[0];
-      window.stewards = value[1];
+      window.stewards = value[1]["data"];
       init();
     })
     .catch((err) => {
@@ -21,9 +22,20 @@ window.addEventListener("load", (event) => {
     });
 });
 
-function init() {
-  console.log("init...");
+function checktimeVal() {
+  //show data based on time value - 30days or lifetime
+  const timeVal= document.getElementById("timeVal");
+  timeVal.addEventListener("input", () => {
+    // data shown based on time value selected
+    return timeVal.value
+  })
+}
 
+
+
+function init() {
+  console.log("init...")
+  timeVal= checktimeVal()
   // map search input field to filterCard function
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
@@ -34,23 +46,40 @@ function init() {
   const orderby = document.getElementById("orderby");
   orderby.addEventListener("input", () => {
     resetSearch();
-    orderStewards();
-    draw();
+    orderStewards(timeVal);
+    draw(timeVal);
   });
 
   // map direction input field to orderStewards function
   const direction = document.getElementById("direction");
   direction.addEventListener("input", () => {
     resetSearch();
-    orderStewards();
-    draw();
+    orderStewards(timeVal);
+    draw(timeVal);
   });
 
-  // reorder the stewards array on default order
-  orderStewards();
-  // add all the stewards to the #grid
-  draw();
 
+
+
+  // reorder the stewards array on default order
+  orderStewards(timeVal);
+  // add all the stewards to the #grid
+  draw(timeVal);
+
+
+// get params from location hash
+
+function getParams() {
+  var hash = window.location.hash.substring(1);
+
+  var params = hash.split("&").reduce(function (res, item) {
+    var parts = item.split("=");
+    res[parts[0]] = decodeURIComponent(parts[1]);
+    return res;
+  }, {});
+
+  return params;
+}
   // inspect location hash ( URL#search=xxx ) and get the params
   params = getParams();
   if (params.search) {
@@ -61,25 +90,13 @@ function init() {
   }
 }
 
-// get params from location hash
-
-function getParams() {
-  var hash = window.location.hash.substr(1);
-
-  var params = hash.split("&").reduce(function (res, item) {
-    var parts = item.split("=");
-    res[parts[0]] = decodeURIComponent(parts[1]);
-    return res;
-  }, {});
-
-  return params;
-}
-
+// clear the search bar, resetting the cards basically :)
 function resetSearch() {
   document.location.hash = "";
   search = document.getElementById("search");
   search.value = "";
 }
+
 
 function filterStewards() {
   search = document.getElementById("search");
@@ -100,13 +117,13 @@ function filterStewards() {
   document.location.hash = "search=" + encodeURIComponent(searchInput);
 }
 
-function orderStewards() {
+function orderStewards(timeVal) {
   orderby = document.getElementById("orderby").value;
   direction = document.getElementById("direction").value;
   // console.log(orderby, direction)
 
   if (orderby == "health") {
-    window.stewards.sort((a, b) => (a.health < b.health ? 1 : -1));
+    window.stewards.sort((a, b) => (a.health[$`timeVal`] < b.health[$`timeVal`] ? 1 : -1));
   }
 
   if (orderby == "weight") {
@@ -115,21 +132,23 @@ function orderStewards() {
 
   if (orderby == "participation") {
     window.stewards.sort((a, b) =>
-      a.participation_snapshot < b.participation_snapshot ? 1 : -1
+      a.voteparticipation[$`timeVal`] < b.voteparticipation[$`timeVal`] ? 1 : -1
     );
   }
 
-  if (orderby == "posts") {
-    window.stewards.sort((a, b) => (a.posts < b.posts ? 1 : -1));
+  if (orderby == "forum_activity") {
+    window.stewards.sort((a, b) => (a.forum_activity[$`timeVal`] < b.forum_activity[$`timeVal`] ? 1 : -1));
   }
 
   // ascending - from low to high
   if (direction == "ascending") {
     window.stewards.reverse();
   }
+
+
 }
 
-function draw() {
+function draw(timeVal) {
   // console.log(window.stewards)
 
   imgpath = "static/stewards/";
@@ -138,7 +157,7 @@ function draw() {
   grid = document.querySelector("#grid");
 
   // delete all inner nodes
-  grid.innerHTML = "";
+  //grid.innerHTML = "";
 
   card = document.querySelector("#card");
 
@@ -152,15 +171,13 @@ function draw() {
       steward.address +
       "/governance/gitcoin";
     statement_url =
-      "https://gov.gitcoin.co/t/introducing-stewards-governance/41/" +
-      steward.statement_post_id;
+      steward.statement_post;
 
     clone.querySelector("#name").innerHTML = steward.name;
-    clone.querySelector("#image").src = imgpath + steward.image;
+    clone.querySelector("#image").src = imgpath + steward.profile_image;
 
-    clone.querySelector("#handle_gitcoin").innerHTML = steward.handle_gitcoin;
-    clone.querySelector("#handle_gitcoin").href =
-      gitcoinurl + steward.handle_gitcoin;
+    clone.querySelector("#gitcoin_username").innerHTML = steward.gitcoin_username;
+    clone.querySelector("#gitcoin_username").href = gitcoinurl + steward.gitcoin_username;
 
     clone.querySelector("#steward_since").innerHTML = steward.steward_since;
 
@@ -168,25 +185,25 @@ function draw() {
 
     clone.querySelector("#votingweight").innerHTML = steward.votingweight;
 
-    clone.querySelector("#participation_snapshot").innerHTML =
-      steward.participation_snapshot;
+    clone.querySelector("#voteparticipation").innerHTML =
+      steward.voteparticipation[$`timeVal`];
 
     clone.querySelector("#delegate_button").href = tally_url;
     clone.querySelector("#votingweight_url").href = tally_url;
 
-    clone.querySelector("#forum_post").innerHTML = steward.posts;
+    clone.querySelector("#forum_activity").innerHTML = steward.forum_activity[$`timeVal`];
     clone.querySelector("#forum_uri").href =
-      "https://gov.gitcoin.co/u/" + steward.handle_forum;
+      "https://gov.gitcoin.co/u/" + steward.discourse_username;
 
     clone.querySelector("#statement_button").href = statement_url;
     clone.querySelector("#steward_since_url").href = statement_url;
 
     clone.querySelector("#health").src =
-      "static/images/health_" + steward.health + ".svg";
+      "static/images/health_" + steward.health['30d'] + ".svg";
 
-    clone.querySelector("#health_num").innerHTML = `${steward.health}/10`;
+    clone.querySelector("#health_num").innerHTML = `${steward.health['30d']}/10`;
 
-    console.log(steward.health);
+    console.log(steward.health['30d']);
 
     if (steward.workstream) {
       stream = window.workstreams.find((o) => o.id === steward.workstream);
@@ -204,9 +221,9 @@ function draw() {
       " " +
       steward.name +
       " " +
-      steward.handle_gitcoin +
+      steward.gitcoin_username +
       " " +
-      steward.handle_forum +
+      steward.discourse_username +
       " " +
       workstream_tag;
 
@@ -221,12 +238,12 @@ function draw() {
       clone.querySelector("#votingweight").classList.add("highlight");
     }
 
-    if (orderby == "posts") {
-      clone.querySelector("#forum_post").classList.add("highlight");
+    if (orderby == "forum_activity") {
+      clone.querySelector("#forum_activity").classList.add("highlight");
     }
 
-    if (orderby == "participation") {
-      clone.querySelector("#participation_snapshot").classList.add("highlight");
+    if (orderby == "voteparticipation") {
+      clone.querySelector("#voteparticipation").classList.add("highlight");
     }
 
     document.querySelector("#grid").appendChild(clone);
