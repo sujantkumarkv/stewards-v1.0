@@ -10,11 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Poppins&family=Space+Mono&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static', filename='css/app.css') }}"
-    />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}"/>
     <meta name="robots" content="index,follow" />
     <meta name="audience" content="Alle" />
     <meta name="revisit-after" content="7 days" />
@@ -81,8 +77,8 @@
         <label for="orderby">Order by</label>
         <select name="orderby" id="orderby">
           <option value="health" selected>Health</option>
-          <option value="statement_post_id">Forum Activity</option>
-          <option value="participation">Vote Participation</option>
+          <option value="forum_activity">Forum Activity</option>
+          <option value="vote_participation">Vote Participation</option>
           <option value="weight">Voting Weight</option>
         </select>
       </div>
@@ -106,7 +102,7 @@
 
     <!-- stewards -->
     <section class="grid" id="grid">
-      {% for steward in stewards_data %}
+      {% for steward in stewards_data["data"] %}
       <div id="card" class="card" data-tags="">
         <!-- head -->
         <div class="head">
@@ -115,8 +111,8 @@
             <img
               id="image"
               loading="lazy"
-              src='../static/images/stewards/{{ steward["image"] }}'
-              alt=""
+              src='../static/images/stewards/{{ steward["profile_image"] }}'
+              alt="steward pfp"
             />
           </figure>
           <div class="user truncate">
@@ -132,10 +128,10 @@
             </div>
           </div>
           <div class="health">
-            <h2>{{ steward["health_score_30d"] }}/10</h2>
+            <h2>{{ steward["health"]["30d"] }}/10</h2>
             <img
               id="health"
-              src='../static/images/health_{{ steward["Health_Score"] }}.svg'
+              src='../static/images/health_{{ steward["health"]["30d"] }}.svg'
             />
           </div>
         </div>
@@ -161,7 +157,7 @@
             </div>
           </div>
 
-          <!-- forum post -->
+          <!-- forum activity -->
           <div class="row">
             <div class="icon">
               <img src="../static/images/forum.svg" />
@@ -174,7 +170,7 @@
                 >Forum Activity</a>
             </div>
             <div class="value truncate">
-              <span id="forum_post">{{ steward["forum_activity_30d"] }}</span>
+              <span id="forum_activity">{{ steward["forum_activity"]["30d"] }}</span>
             </div>
           </div>
 
@@ -187,11 +183,15 @@
               <a href="http://gitcoindao.com" target="_blank">Workstream</a>
             </div>
             <div class="value truncate">
-              <a id="workstream_url" href="#" target="_blank"
-                ><span id="workstream_name" class="workstream_name"
-                  >{{ steward['workstream'] }}</span
-                ></a
-              >
+              <a id="workstream_url" href="#" target="_blank">
+                <span id="workstream_name" class="workstream_name">
+                  {% if steward['workstream'] %}
+                    {{ steward['workstream'] }}
+                  {% else %}
+                      -
+                  {% endif %}
+                </span>
+              </a>
             </div>
           </div>
 
@@ -210,9 +210,7 @@
             </div>
             <div class="value truncate">
               <span id="votingweight" class="percentage">
-                <!-- {% if steward["votingweight"] == "nan" %} N/A {% else %} {{
-                steward["votingweight"] }}% {% endif %} -->
-                N/A
+                {{ steward['voting_weight'] }}
               </span>
             </div>
           </div>
@@ -228,10 +226,8 @@
               >
             </div>
             <div class="value truncate">
-              <span id="participation_snapshot" class="percentage">
-                <!-- {% if steward["voteparticipation"] == "nan" %} N/A {% else %} {{
-                steward["voteparticipation"] }}% {% endif %} -->
-                N/A
+              <span id="voteparticipation" class="percentage">
+                {{ steward['vote_participation']['30d'] }}
               </span>
             </div>
           </div>
@@ -250,9 +246,7 @@
             id="delegate_button"
             class="btn truncate teal"
             target="_blank"
-            href='https://www.withtally.com/voter/{{ steward["address"] }}/governance/gitcoin'
-            >Delegate</a
-          >
+            href='https://www.withtally.com/voter/{{ steward["address"] }}/governance/gitcoin'>Delegate</a>
         </div>
       </div>
       {% endfor %}

@@ -7,7 +7,7 @@ import time
 
 #snapshot_proposals= proposals()
 githubData= requests.get("https://raw.githubusercontent.com/mmmgtc/stewards/main/assets/json/data.json").json()
-karmaData= requests.get("https://api.karmaprotocol.io/api/dao/delegates?name=gitcoin&pageSize=10000&offset=0").json()
+karmaData= requests.get("https://api.karmaprotocol.io/api/dao/delegates?name=gitcoin&pageSize=250&offset=0&workstreamId=6,4,3,7,1,2,5").json()
 
 
 def getKarmaDataStats(EthAddress, timeVal, variableName):
@@ -27,21 +27,27 @@ def checkStewardPosition(EthAddress):
                 return 5 #w value then is used as 5 for score calculation
             elif (steward["workstream"].split(" ")[1]).lower() == "contributor":
                 return 3 #w value then is used as 5 for score calculation
+            else: return 0
     return 0
         
 
 
 def getHealthScore(EthAddress, timeVal):
     """
-    score = offChainVotesPct * 0.7 + proposalsInitiated * 1.5 + proposalsDiscussed * 0.7 + 
+    time_value= 30days / lifetime 
+    
+    score = offChainVotesPct * 0.07 + proposalsInitiated * 1.5 + proposalsDiscussed * 0.7 + 
             (forumTopicCount - proposalsInitiated) * 1.1 + (forumPostCount - proposalsDiscussed)*0.6 
             + workstreamInvolvement
     finalScore = Min(score, 10)
     """
     W= checkStewardPosition(EthAddress=EthAddress)
-    score= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.7 \
-            + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 \
-                + getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated"))*1.1 + (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed"))*0.60 + W
+    score= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.07 + \
+             getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 + \
+                 getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + \
+                    (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated"))*1.1 + \
+                        (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed"))*0.60 + \
+                            W
     health_score= int(min(score, 10)) #as we are rating out of 10
     return health_score
     
