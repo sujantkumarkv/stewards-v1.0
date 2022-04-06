@@ -15,9 +15,9 @@ def getKarmaDataStats(EthAddress, timeVal, variableName):
         if steward["publicAddress"].lower() == EthAddress.lower():
             for stewardStat in steward["stats"]: # [0], [1]
                 if stewardStat["period"] == timeVal:
-                    return stewardStat[variableName]
-                else: return 0
-        else: continue
+                    return stewardStat[variableName] 
+            return 0    
+    return 0
                 
                                
 def checkStewardPosition(EthAddress):
