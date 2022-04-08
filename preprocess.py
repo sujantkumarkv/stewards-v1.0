@@ -2,12 +2,13 @@ import os
 import requests
 import json
 import time
+from datetime import datetime as dt
 #from app.helpers.helpers import get_proposals
 #from app.helpers.proposals import proposals
 
 #snapshot_proposals= proposals()
 githubData= requests.get("https://raw.githubusercontent.com/mmmgtc/stewards/main/assets/json/data.json").json()
-karmaData= requests.get("https://api.karmaprotocol.io/api/dao/delegates?name=gitcoin&pageSize=250&offset=0&workstreamId=6,4,3,7,1,2,5").json()
+karmaData= requests.get("https://api.showkarma.xyz/api/dao/delegates?name=gitcoin&pageSize=250&offset=0&workstreamId=6,4,3,7,1,2,5").json()
 
 
 def getKarmaDataStats(EthAddress, timeVal, variableName):
@@ -51,7 +52,12 @@ def getHealthScore(EthAddress, timeVal):
     health_score= int(min(score, 10)) #as we are rating out of 10
     return health_score
     
-    
+def getStewardDays(steward_since):
+    t1= dt.strptime(steward_since, "%Y-%m-%d")
+    t2= dt.strptime(dt.now().strftime("%Y-%m-%d"), "%Y-%m-%d")
+    delta_t= t2 - t1
+    return int(abs(delta_t).days)
+
 def preprocess():
     #proposals_data = get_proposals()
     #length_proposals = len(proposals_data)
@@ -70,6 +76,7 @@ def preprocess():
                 "gitcoin_username": steward["handle_gitcoin"],
                 "discourse_username": steward["handle_forum"],
                 "steward_since": steward["steward_since"],
+                "steward_days": getStewardDays(steward_since= steward["steward_since"]),
                 "statement_post": f"https://gov.gitcoin.co/t/introducing-stewards-governance/41/{steward['statement_post_id']}",
                 "forum_activity": {
                     "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount",) + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
