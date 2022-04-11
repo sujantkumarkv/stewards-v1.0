@@ -7,7 +7,7 @@ from datetime import datetime as dt
 #from app.helpers.proposals import proposals
 
 #snapshot_proposals= proposals()
-githubData= requests.get("https://raw.githubusercontent.com/mmmgtc/stewards/main/assets/json/data.json").json()
+githubData= requests.get("https://raw.githubusercontent.com/mmmgtc/stewards/main/assets/json/stewards_data.json").json()
 karmaData= requests.get("https://api.showkarma.xyz/api/dao/delegates?name=gitcoin&pageSize=250&offset=0&workstreamId=6,4,3,7,1,2,5").json()
 
 
@@ -22,7 +22,7 @@ def getKarmaDataStats(EthAddress, timeVal, variableName):
                 
                                
 def checkStewardPosition(EthAddress):
-    for steward in githubData:
+    for steward in githubData["data"]:
         if steward["address"] == EthAddress and steward["workstream"]!= "":
             if (steward["workstream"].split(" ")[1]).lower() == "lead":
                 return 5 #w value then is used as 5 for score calculation
@@ -67,26 +67,26 @@ def preprocess():
 
     #else:      
     data= []  
-    for steward in githubData:
+    for steward in githubData["data"]:
         steward_data= {
                 "name": steward["name"],
                 "address": steward["address"],
-                "profile_image": steward["image"],
+                "profile_image": steward["profile_image"],
                 "workstream": steward["workstream"],
-                "gitcoin_username": steward["handle_gitcoin"],
-                "discourse_username": steward["handle_forum"],
+                "gitcoin_username": steward["gitcoin_username"],
+                "discourse_username": steward["discourse_username"],
                 "steward_since": steward["steward_since"],
                 "steward_days": getStewardDays(steward_since= steward["steward_since"]),
-                "statement_post": f"https://gov.gitcoin.co/t/introducing-stewards-governance/41/{steward['statement_post_id']}",
+                "statement_post": steward['statement_post'],
                 "forum_activity": {
-                    "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount",) + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
-                    "lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumTopicCount")),
+                    "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount")),
+                    "lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount")),
                     }, 
                 "vote_participation": {
                     "30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),
                     "lifetime": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="offChainVotesPct"),
                     },
-                "voting_weight": steward["votingweight"],
+                "voting_weight": steward["voting_weight"],
                 "snapshot_votes": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"),
                 "health": {
                     "30d": getHealthScore(EthAddress=steward['address'], timeVal='30d'), 
