@@ -1,7 +1,7 @@
-import os
 import requests
 import json
 import time
+import math
 from datetime import datetime as dt
 #from app.helpers.helpers import get_proposals
 #from app.helpers.proposals import proposals
@@ -15,12 +15,20 @@ def getKarmaDataStats(EthAddress, timeVal, variableName):
     for steward in karmaData["data"]["delegates"]:
         if steward["publicAddress"].lower() == EthAddress.lower():
             for stewardStat in steward["stats"]: # [0], [1]
-                if stewardStat["period"] == timeVal:
-                    return stewardStat[variableName] 
+                if stewardStat["period"] == timeVal: 
+                    #some vals returned by the API are *null* as well, gotta deal with it.
+                    if (stewardStat[variableName]):
+                        return stewardStat[variableName] 
+                    else: return 0  
             return 0    
     return 0
                 
-                               
+def getStewardDays(steward_since):
+    t1= dt.strptime(steward_since, "%Y-%m-%d")
+    t2= dt.strptime(dt.now().strftime("%Y-%m-%d"), "%Y-%m-%d")
+    delta_t= t2 - t1
+    return int(abs(delta_t).days)
+                              
 def checkStewardPosition(EthAddress):
     for steward in githubData["data"]:
         if steward["address"] == EthAddress and steward["workstream"]!= "":
@@ -32,31 +40,45 @@ def checkStewardPosition(EthAddress):
     return 0
         
 
-
-def getHealthScore(EthAddress, timeVal):
-    """
-    time_value= 30days / lifetime 
     
+def getHealth_lifetime(EthAddress, timeVal, steward_days):
+    W= checkStewardPosition(EthAddress=EthAddress)
+    """
+    #lifetime score 
+    score = offChainVotesPct* 0.07 + (proposalsInitiated * 1.5 + proposalsDiscussed * 1
+                + (forumTopicCount - proposalsInitiated) * 1.1 
+                + (forumPostCount - proposalsDiscussed)*0.7) / SQRT(Steward_days) + workstreamInvolvement
+    finalScore = Min(score, 10) 
+    """
+    score_lifetime= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.07 + \
+            ((getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 + \
+                getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*1 + \
+                    (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal="lifetime", variableName="proposalsInitiated"))*1.1 + \
+                        (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal="lifetime", variableName="proposalsDiscussed"))*0.7) / math.sqrt(steward_days)) + \
+                            W
+    health_lifetime= int(min(score_lifetime, 10))
+    return health_lifetime
+
+def getHealth_30d(EthAddress, timeVal):
+    W= checkStewardPosition(EthAddress=EthAddress)
+    """
+    time_value= 30days OR lifetime 
+    
+    #30days score
     score = offChainVotesPct * 0.07 + proposalsInitiated * 1.5 + proposalsDiscussed * 0.7 + 
             (forumTopicCount - proposalsInitiated) * 1.1 + (forumPostCount - proposalsDiscussed)*0.6 
             + workstreamInvolvement
     finalScore = Min(score, 10)
     """
-    W= checkStewardPosition(EthAddress=EthAddress)
-    score= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.07 + \
-             getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 + \
-                 getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + \
-                    (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated"))*1.1 + \
-                        (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed"))*0.60 + \
+    score_30d= getKarmaDataStats(EthAddress, timeVal, variableName="offChainVotesPct")*0.07 + \
+                getKarmaDataStats(EthAddress, timeVal, variableName="proposalsInitiated")*1.5 + \
+                    getKarmaDataStats(EthAddress, timeVal, variableName="proposalsDiscussed")*0.7 + \
+                        (getKarmaDataStats(EthAddress, timeVal, variableName="forumTopicCount") - getKarmaDataStats(EthAddress, timeVal="30d", variableName="proposalsInitiated"))*1.1 + \
+                            (getKarmaDataStats(EthAddress, timeVal, variableName="forumPostCount") - getKarmaDataStats(EthAddress, timeVal="30d", variableName="proposalsDiscussed"))*0.60 + \
                             W
-    health_score= int(min(score, 10)) #as we are rating out of 10
-    return health_score
-    
-def getStewardDays(steward_since):
-    t1= dt.strptime(steward_since, "%Y-%m-%d")
-    t2= dt.strptime(dt.now().strftime("%Y-%m-%d"), "%Y-%m-%d")
-    delta_t= t2 - t1
-    return int(abs(delta_t).days)
+    health_30d= int(min(score_30d, 10)) #as we are rating out of 10
+    return health_30d  
+
 
 def preprocess():
     #proposals_data = get_proposals()
@@ -76,7 +98,7 @@ def preprocess():
                 "gitcoin_username": steward["gitcoin_username"],
                 "discourse_username": steward["discourse_username"],
                 "steward_since": steward["steward_since"],
-                "steward_days": getStewardDays(steward_since= steward["steward_since"]),
+                "steward_days": getStewardDays(steward_since=steward["steward_since"]),
                 "statement_post": steward['statement_post'],
                 "forum_activity": {
                     "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount")),
@@ -89,8 +111,8 @@ def preprocess():
                 "voting_weight": steward["voting_weight"],
                 "snapshot_votes": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"),
                 "health": {
-                    "30d": getHealthScore(EthAddress=steward['address'], timeVal='30d'), 
-                    "lifetime": getHealthScore(EthAddress=steward['address'], timeVal='lifetime'), 
+                    "30d": getHealth_30d(EthAddress=steward['address'], timeVal='30d'), 
+                    "lifetime": getHealth_lifetime(EthAddress=steward['address'], timeVal='lifetime', steward_days=getStewardDays(steward_since=steward["steward_since"])), 
                     }, 
             }
         data.append(steward_data)
