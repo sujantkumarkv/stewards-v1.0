@@ -1,5 +1,3 @@
-
-   
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -81,8 +79,8 @@
         <label for="orderby">Order by</label>
         <select id="orderby" name="orderby">
           <option value="health" selected>Health</option>
-          <option value="forum_activity">Forum posts</option>
-          <option value="weight">Voting Weight</option>
+          <option value="forum_activity">Forum activity</option>
+          <option value="voting_weight">Voting Weight</option>
           <option value="vote_participation">Vote participation</option>
         </select>
       </div>
@@ -94,36 +92,25 @@
           <option value="ascending">Ascending</option>
         </select>
       </div>
-      <div class="input-wrapper">
+      <div class="input-wrapper" id="timeVal_div">
         <label for="timeVal">Time</label>
         <select name="timeVal" id="timeVal">
-          <option value="30d" selected>Last 30Days</option>
-          <option value="lifetime selected">Lifetime</option>
+          <option value="30d" selected>Last 30 days</option>
+          <option value="lifetime">Lifetime</option>
         </select>
       </div>
     </section>
 
     <!-- stewards -->
-    <section id="grid" class="grid"></section>
+    <section id="grid" class="grid">
 
-    <!-- footer-->
-    <footer>
-      <a href="https://m-m-m.xyz/" target="_blank">
-        <img class="mmm" src="static/images/mmm.svg" />
-      </a>
-    </footer>
-
-    <!-- gitcoindao-->
-    <section id="gitcoindao">
-      <a href="https://gitcoindao.com" target="_blank">
-        <img src="static/images/gitcoindao.svg" alt="gitcoindao" />
-      </a>
-    </section>
-
-    <template id="card">
+    
+   
+    <div id="card">
       <div id="card" class="card" data-tags="">
         <!-- head -->
         <div class="head">
+          <p class="steward_address" hidden></p>
           <figure>
             <img id="image" loading="lazy" src="#" alt="" />
           </figure>
@@ -135,7 +122,9 @@
           </div>
           <div class="health">
             <h2 id="health_num">/10</h2>
-            <img id="health" src="static/images/health_0.svg" />
+            <div class="icon">
+              <img id="health" src="static/images/health_0.svg" />
+            </div>
           </div>
         </div>
 
@@ -162,7 +151,7 @@
               <img src="static/images/forum.svg" />
             </div>
             <div class="property truncate">
-              <a id="forum_uri" href="#" target="_blank">Forum posts</a>
+              <a id="forum_uri" href="#" target="_blank">Forum activity</a>
             </div>
             <div class="value truncate">
               <span id="forum_post">2</span>
@@ -196,7 +185,7 @@
               >
             </div>
             <div class="value truncate">
-              <span id="votingweight" class="percentage">33</span>
+              <span id="votingweight" >33</span>
             </div>
           </div>
 
@@ -211,7 +200,7 @@
               >
             </div>
             <div class="value truncate">
-              <span id="participation_snapshot" class="percentage">33</span>
+              <span id="vote_participation">33</span>
             </div>
           </div>
         </div>
@@ -230,7 +219,27 @@
           >
         </div>
       </div>
-    </template>
+    </div>
+     
+
+    </section>
+    
+
+    <!-- footer-->
+    <footer>
+      <a href="https://m-m-m.xyz/" target="_blank">
+        <img class="mmm" src="static/images/mmm.svg" />
+      </a>
+    </footer>
+
+    <!-- gitcoindao-->
+    <section id="gitcoindao">
+      <a href="https://gitcoindao.com" target="_blank">
+        <img src="static/images/gitcoindao.svg" alt="gitcoindao" />
+      </a>
+    </section>
+
+    
 
     <script defer src="static/js/app.js"></script>
   </body>

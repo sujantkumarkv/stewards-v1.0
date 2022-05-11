@@ -108,8 +108,9 @@ def preprocess():
                     "30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),
                     "lifetime": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="offChainVotesPct"),
                     },
-                "voting_weight": steward["voting_weight"],
-                "snapshot_votes": getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"),
+                "voting_weight": round(float(getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="delegatedVotes"))/1000000, 2), #we use `lifetime` for delegatedVotes only.
+                                #round up to 2 decimal places, first converting to float for safety(return value maybe string)
+                
                 "health": {
                     "30d": getHealth_30d(EthAddress=steward['address'], timeVal='30d'), 
                     "lifetime": getHealth_lifetime(EthAddress=steward['address'], timeVal='lifetime', steward_days=getStewardDays(steward_since=steward["steward_since"])), 

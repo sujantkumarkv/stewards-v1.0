@@ -2,13 +2,11 @@ window.addEventListener("load", (event) => {
   window.stewards = [];
   window.workstreams = [];
 
-  cachbuster = new Date().getTime();
-
   Promise.all([
-    fetch("static/json/workstreams.json?" + cachbuster).then((value) =>
+    fetch("static/json/workstreams.json?" ).then((value) =>
       value.json()
     ),
-    fetch("static/json/stewards_data.json?" + cachbuster).then((value) => value.json()),
+    fetch("static/json/stewards_data.json?" ).then((value) => value.json()),
   ])
     .then((value) => {
       window.workstreams = value[0];
@@ -22,6 +20,8 @@ window.addEventListener("load", (event) => {
 
 function init() {
   console.log("init...");
+  timeVal_div= document.getElementById("timeVal_div");
+  timeVal_div.classList.add("highlight");
 
   // map search input field to filterCard function
   const search = document.getElementById("search");
@@ -71,7 +71,7 @@ function init() {
 // get params from location hash
 
 function getParams() {
-  var hash = window.location.hash.substr(1);
+  var hash = window.location.hash.substring(1);
 
   var params = hash.split("&").reduce(function (res, item) {
     var parts = item.split("=");
@@ -97,7 +97,7 @@ function filterStewards() {
   searchInput = search.value.toLowerCase();
   datatags.forEach((item) => {
     tags = item.dataset.tags.toLowerCase();
-    if (tags.indexOf(searchInput) !== -1) {
+    if (tags.indexOf(searchInput) != -1) { //search input found
       item.style.display = "";
     } else {
       item.style.display = "none";
@@ -108,61 +108,63 @@ function filterStewards() {
 }
 
 function orderStewards() {
-  timeval = document.getElementById("timeVal").value;
+  timeVal = document.getElementById("timeVal").value;
   orderby = document.getElementById("orderby").value;
   direction = document.getElementById("direction").value;
-  // console.log(orderby, direction)
+  //console.log(orderby, direction)
 
   if (orderby == "health") {
-    window.stewards.sort((a, b) => (a.health[timeval] < b.health[timeval] ? 1 : -1));
+    window.stewards.sort((a, b) => (a.health[timeVal] < b.health[timeVal] ? 1 : -1));
   }
 
-  if (orderby == "weight") {
-    window.stewards.sort((a, b) => (a.votingweight < b.votingweight ? 1 : -1));
+  if (orderby == "voting_weight") {
+    window.stewards.sort((a, b) => (a.voting_weight < b.voting_weight ? 1 : -1));
+    //console.log(window.stewards)
   }
 
   if (orderby == "vote_participation") {
-    window.stewards.sort((a, b) =>
-      a.vote_participation[timeval] < b.vote_participation[timeval] ? 1 : -1
-    );
+    window.stewards.sort((a, b) => a.vote_participation[timeVal] < b.vote_participation[timeVal] ? 1 : -1);
+    //console.log(window.stewards)
   }
 
   if (orderby == "forum_activity") {
-    window.stewards.sort((a, b) => (a.forum_activity[timeval] < b.forum_activity[timeval] ? 1 : -1));
+    window.stewards.sort((a, b) => (a.forum_activity[timeVal] < b.forum_activity[timeVal] ? 1 : -1));
   }
 
   // ascending - from low to high
   if (direction == "ascending") {
+    //console.log(window.stewards)
     window.stewards.reverse();
+    //console.log(window.stewards)
   }
 }
 
 function draw() {
   // console.log(window.stewards)
 
-  timeval = document.getElementById("timeVal").value;
-  imgpath = "static/stewards/";
+  timeVal = document.getElementById("timeVal").value;
+  imgpath = "static/images/stewards/";
   gitcoinurl = "https://gitcoin.co/";
 
   grid = document.querySelector("#grid");
+  card = document.querySelector("#card");
 
   // delete all inner nodes
   grid.innerHTML = "";
 
-  card = document.querySelector("#card");
+  var new_cards= []
+
 
   // generate all steward cards
 
   window.stewards.forEach((steward) => {
-    clone = document.importNode(card.content, true);
+    clone = document.importNode(card, true);
 
     tally_url =
       "https://www.withtally.com/voter/" +
       steward.address +
       "/governance/gitcoin";
-    statement_url =
-      "https://gov.gitcoin.co/t/introducing-stewards-governance/41/" +
-      steward.statement_post_id;
+    statement_url = steward.statement_post;
 
     clone.querySelector("#name").innerHTML = steward.name;
     clone.querySelector("#image").src = imgpath + steward.profile_image;
@@ -175,29 +177,43 @@ function draw() {
 
     clone.querySelector("#workstream_url").href = "TBD";
 
-    clone.querySelector("#votingweight").innerHTML = steward.voting_weight;
+    clone.querySelector("#votingweight").innerHTML = steward.voting_weight+ "%";
 
     // wrap in if condition for 30d/lifetime
-    clone.querySelector("#participation_snapshot").innerHTML =
-      steward.vote_participation[timeval];
+    clone.querySelector("#vote_participation").innerHTML = steward.vote_participation[timeVal]+ "%";
+    // edge case of vote_participation["lifetime"] !=0 but for ["30d"] being =0, we use lifetime value instead
+    // and show "-" for 30days for vote_participation (as feedback from Fred ser)
+    if (timeVal == "30d") {
+      if (steward.vote_participation["lifetime"]!=0 && steward.vote_participation["30d"]==0) {
+        clone.querySelector("#vote_participation").innerHTML = "-";
+        // New health calculation :)
+        const new_health_for_edgecase= parseInt(((steward.health["30d"] - (steward.vote_participation["30d"]*0.07)) + steward.vote_participation["lifetime"]*0.07));
+        clone.querySelector("#health_num").innerHTML = `${new_health_for_edgecase}/10`;
+      }
+    }
 
     clone.querySelector("#delegate_button").href = tally_url;
     clone.querySelector("#votingweight_url").href = tally_url;
 
-    clone.querySelector("#forum_post").innerHTML = steward.forum_activity[timeval];
+    clone.querySelector("#forum_post").innerHTML = steward.forum_activity[timeVal];
     clone.querySelector("#forum_uri").href =
-      "https://gov.gitcoin.co/u/" + steward.handle_forum;
+      "https://gov.gitcoin.co/u/" + steward.discourse_username;
 
     clone.querySelector("#statement_button").href = statement_url;
     clone.querySelector("#steward_since_url").href = statement_url;
 
-    clone.querySelector("#health").src =
-      "static/images/health_" + steward.health + ".svg";
-
-    clone.querySelector("#health_num").innerHTML = `${steward.health[timeval]}/10`;
+    if (steward.steward_days > 30) {
+      clone.querySelector("#health").src =
+      `static/images/health_${steward.health[timeVal]}.svg`;
+      clone.querySelector("#health_num").innerHTML = `${steward.health[timeVal]}/10`;
+    } else {
+      clone.querySelector("#health").src = "";
+      clone.querySelector("#health_num").innerHTML = "New✨";
+    }
+    
 
     if (steward.workstream) {
-      stream = window.workstreams.find((o) => o.id === steward.workstream);
+      stream = window.workstreams.find((o) => o.name.toLowerCase() === steward.workstream.toLowerCase());
       clone.querySelector("#workstream_name").innerHTML = stream.name;
       clone.querySelector("#workstream_url").href = stream.uri;
       workstream_tag = stream.name;
@@ -221,22 +237,38 @@ function draw() {
     // apply highlights to cards based on orderby
     orderby = document.getElementById("orderby").value;
 
-    if (orderby == "health") {
-      clone.querySelector("#health").classList.add("highlight");
-    }
-
-    if (orderby == "weight") {
+    if (orderby == "voting_weight") {
       clone.querySelector("#votingweight").classList.add("highlight");
+      clone.querySelector("#forum_post").classList.remove("highlight");
+      clone.querySelector("#vote_participation").classList.remove("highlight");
     }
 
-    if (orderby == "posts") {
+    if (orderby == "forum_activity") {
       clone.querySelector("#forum_post").classList.add("highlight");
+      clone.querySelector("#votingweight").classList.remove("highlight");
+      clone.querySelector("#vote_participation").classList.remove("highlight");
     }
 
-    if (orderby == "participation") {
-      clone.querySelector("#participation_snapshot").classList.add("highlight");
+    if (orderby == "vote_participation") {
+      clone.querySelector("#vote_participation").classList.add("highlight");
+      clone.querySelector("#forum_post").classList.remove("highlight");
+      clone.querySelector("#votingweight").classList.remove("highlight");
     }
 
-    document.querySelector("#grid").appendChild(clone);
+    if (orderby == "health") {
+      clone.querySelector("#vote_participation").classList.remove("highlight");
+      clone.querySelector("#forum_post").classList.remove("highlight");
+      clone.querySelector("#votingweight").classList.remove("highlight");
+    }
+
+    new_cards.push(clone)
+    //document.querySelector("#grid").appendChild(clone);
   });
+  //document.querySelector("#grid");
+  grid.innerHTML = "";
+  new_cards.forEach((card) => {
+    document.querySelector("#grid").appendChild(card);
+  })
+  new_cards= []
+
 }
