@@ -19,4 +19,4 @@ def index():
     But things change in deploying. `app.run` isn't needed. Infact, deploy didn't work Ig due to this."""
 #if __name__ == "__main__":
 #    app.run()
-app.run()
+#app.run()
