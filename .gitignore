@@ -6,4 +6,4 @@ config.codekit3
 app/__pycache__
 __pycache__
 app/helpers/__pycache__
-app/try.py 
+node_modules
