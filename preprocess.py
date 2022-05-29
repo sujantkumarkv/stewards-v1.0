@@ -101,8 +101,8 @@ def preprocess():
                 "steward_days": getStewardDays(steward_since=steward["steward_since"]),
                 "statement_post": steward['statement_post'],
                 "forum_activity": {
-                    "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount")),
-                    "lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount")),
+                    "30d": (getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="forumTopicCount")),
+                    "lifetime": (getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumPostCount") + getKarmaDataStats(EthAddress=steward['address'], timeVal='lifetime', variableName="forumTopicCount")),
                     }, 
                 "vote_participation": {
                     "30d": getKarmaDataStats(EthAddress=steward['address'], timeVal='30d', variableName="offChainVotesPct"),

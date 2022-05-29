@@ -27,6 +27,8 @@ function init() {
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
     filterStewards();
+    //orderStewards();
+    //draw();
   });
 
   const timeVal= document.getElementById("timeVal");
@@ -265,7 +267,8 @@ function draw() {
     //document.querySelector("#grid").appendChild(clone);
   });
   //document.querySelector("#grid");
-  grid.innerHTML = "";
+  //grid.innerHTML = "";
+  //console.log(grid.innerHTML)
   new_cards.forEach((card) => {
     document.querySelector("#grid").appendChild(card);
   })
