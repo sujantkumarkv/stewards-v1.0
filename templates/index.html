@@ -65,9 +65,7 @@
 
         <p>
           Data powered by 
-           <a href="https://www.showkarma.xyz/">Karma 
-           </a>
-           (Last updated <strong>{{lastUpdated}} hours</strong> ago..)
+           <a href="https://www.showkarma.xyz/">Karma</a>  Last updated <strong>{{lastUpdated}} hours</strong> ago..
        </p>
        
 
@@ -104,10 +102,12 @@
       <div class="input-wrapper" id="timeVal_div">
         <label for="timeVal">Time</label>
         <select name="timeVal" id="timeVal">
-          <option value="30d" selected>Last 30 days ({{ dates["thirtyDaysBack"] }} - {{ dates["today"] }}) </option>
+          <option value="30d" selected>Last 30 days  </option>
           <option value="lifetime">Lifetime</option>
         </select>
+        <div class="ui last30DaysDates">{{ dates["thirtyDaysBack"] }} - {{ dates["today"] }}</div>
       </div>
+      
     </section>
 
     <!-- stewards -->

@@ -281,6 +281,11 @@ section#gitcoindao a {
   width: 100%;
   border-radius: 6px;
 }
+.ui .last30DaysDates{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
 .ui input,
 .ui select {
   width: 100%;
