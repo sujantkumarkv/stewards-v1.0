@@ -27,6 +27,8 @@ function init() {
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
     filterStewards();
+    //was checking if hitting backspace is firing event or not.
+    console.log("event fired")
     //orderStewards();
     //draw();
   });
@@ -60,6 +62,24 @@ function init() {
   // add all the stewards to the #grid
   draw();
 
+  /* 
+    Searching cards but going back with backspace didn't restore the cards because in drawSearchedCards()
+    we do grid.innerHTML= "", and the datatags for searching itself isn't the full original list. 
+    So, fixing the bug by storing the intial full list of datatags of all stewards when the page first loads.
+    We use window.localStorage() for this after the draw() is done in init()...
+
+  */
+ 
+  window.localStorage.setItem('searchDatatags', JSON.stringify(searchDatatags));
+
+  const datatags = document.querySelectorAll('[data-tags]');
+  //using spread operatot to use array method on collection
+  let searchDatatags = []
+  datatags.forEach((item) => {
+    searchDatatags.push(item.dataset.tags.toLowerCase());
+  })
+  localStorage.setItem('searchDatatags', JSON.stringify(searchDatatags));
+
   // inspect location hash ( URL#search=xxx ) and get the params
   params = getParams();
   if (params.search) {
@@ -91,22 +111,46 @@ function resetSearch() {
 }
 
 function filterStewards() {
+  console.log("filterStewards starts")
   search = document.getElementById("search");
+  let searchedCards= []
 
-  let datatags = document.querySelectorAll("[data-tags]");
-  //console.log(datatags)
-
+  const datatags= JSON.parse(window.localStorage.getItem('searchDatatags'));
+  
   searchInput = search.value.toLowerCase();
-  datatags.forEach((item) => {
-    tags = item.dataset.tags.toLowerCase();
-    if (tags.indexOf(searchInput) != -1) { //search input found
+  console.log(searchInput);
+  /*
+  [...datatags].forEach((item) => {
+
+  })
+  */
+  for(i=0; i<datatags.length; i++) {
+    let item= datatags[i]; 
+    let searchtags = item.dataset.tags.toLowerCase();
+    if (searchtags.indexOf(searchInput) != -1) { //search input found
       item.style.display = "";
+      searchedCards.push(item);
     } else {
       item.style.display = "none";
     }
-  });
+  }
 
   document.location.hash = "search=" + encodeURIComponent(searchInput);
+  //window.stewards= searchedCards;
+  drawSearchedCards(searchedCards);
+  //searchedCards=[]
+}
+
+function drawSearchedCards(searchedCards) {
+  grid = document.querySelector("#grid");
+  // delete all inner nodes
+  grid.innerHTML = "";
+
+  searchedCards.forEach((card) => {
+    grid.appendChild(card);
+  })
+  //searchedCards= [];
+  ;
 }
 
 function orderStewards() {
