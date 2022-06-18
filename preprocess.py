@@ -128,5 +128,6 @@ def preprocess():
     return stewards_data
 
 
+preprocess()
 
     

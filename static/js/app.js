@@ -70,7 +70,7 @@ function init() {
 
   */
  
-  window.localStorage.setItem('searchDatatags', JSON.stringify(searchDatatags));
+  //window.localStorage.setItem('searchDatatags', JSON.stringify(searchDatatags));
 
   const datatags = document.querySelectorAll('[data-tags]');
   //using spread operatot to use array method on collection
@@ -113,7 +113,7 @@ function resetSearch() {
 function filterStewards() {
   console.log("filterStewards starts")
   search = document.getElementById("search");
-  let searchedCards= []
+  let matchedCards= []
 
   const datatags= JSON.parse(window.localStorage.getItem('searchDatatags'));
   
@@ -126,31 +126,43 @@ function filterStewards() {
   */
   for(i=0; i<datatags.length; i++) {
     let item= datatags[i]; 
-    let searchtags = item.dataset.tags.toLowerCase();
+    let searchtags = item;
     if (searchtags.indexOf(searchInput) != -1) { //search input found
-      item.style.display = "";
-      searchedCards.push(item);
+      matchedCards.push(searchtags.split(" ")[2]); //getting gitcoin username
     } else {
-      item.style.display = "none";
+      continue;
     }
   }
 
   document.location.hash = "search=" + encodeURIComponent(searchInput);
   //window.stewards= searchedCards;
-  drawSearchedCards(searchedCards);
-  //searchedCards=[]
+  drawSearchedCards(matchedCards);
+  //searchedCards=[
 }
 
-function drawSearchedCards(searchedCards) {
+function drawSearchedCards(matchedCards) {
   grid = document.querySelector("#grid");
   // delete all inner nodes
   grid.innerHTML = "";
 
+  //let searchedCards= []
+  window.stewards.forEach((steward) => {
+    matchedCards.forEach((stewardUsername) => {
+      if(steward['gitcoin_username'] == stewardUsername){
+        grid.appendChild(steward);
+      }    
+      else {
+        console.log('didnt match');
+    }
+    })
+  })
+  
+  /*
   searchedCards.forEach((card) => {
     grid.appendChild(card);
   })
   //searchedCards= [];
-  ;
+  **/
 }
 
 function orderStewards() {
