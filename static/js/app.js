@@ -27,8 +27,6 @@ function init() {
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
     filterStewards();
-    //was checking if hitting backspace is firing event or not.
-    console.log("event fired")
     //orderStewards();
     //draw();
   });
@@ -62,24 +60,6 @@ function init() {
   // add all the stewards to the #grid
   draw();
 
-  /* 
-    Searching cards but going back with backspace didn't restore the cards because in drawSearchedCards()
-    we do grid.innerHTML= "", and the datatags for searching itself isn't the full original list. 
-    So, fixing the bug by storing the intial full list of datatags of all stewards when the page first loads.
-    We use window.localStorage() for this after the draw() is done in init()...
-
-  */
- 
-  //window.localStorage.setItem('searchDatatags', JSON.stringify(searchDatatags));
-
-  const datatags = document.querySelectorAll('[data-tags]');
-  //using spread operatot to use array method on collection
-  let searchDatatags = []
-  datatags.forEach((item) => {
-    searchDatatags.push(item.dataset.tags.toLowerCase());
-  })
-  localStorage.setItem('searchDatatags', JSON.stringify(searchDatatags));
-
   // inspect location hash ( URL#search=xxx ) and get the params
   params = getParams();
   if (params.search) {
@@ -111,58 +91,22 @@ function resetSearch() {
 }
 
 function filterStewards() {
-  console.log("filterStewards starts")
   search = document.getElementById("search");
-  let matchedCards= []
 
-  const datatags= JSON.parse(window.localStorage.getItem('searchDatatags'));
-  
+  let datatags = document.querySelectorAll("[data-tags]");
+  //console.log(datatags)
+
   searchInput = search.value.toLowerCase();
-  console.log(searchInput);
-  /*
-  [...datatags].forEach((item) => {
-
-  })
-  */
-  for(i=0; i<datatags.length; i++) {
-    let item= datatags[i]; 
-    let searchtags = item;
-    if (searchtags.indexOf(searchInput) != -1) { //search input found
-      matchedCards.push(searchtags.split(" ")[2]); //getting gitcoin username
+  datatags.forEach((item) => {
+    tags = item.dataset.tags.toLowerCase();
+    if (tags.indexOf(searchInput) != -1) { //search input found
+      item.style.display = "";
     } else {
-      continue;
+      item.style.display = "none";
     }
-  }
+  });
 
   document.location.hash = "search=" + encodeURIComponent(searchInput);
-  //window.stewards= searchedCards;
-  drawSearchedCards(matchedCards);
-  //searchedCards=[
-}
-
-function drawSearchedCards(matchedCards) {
-  grid = document.querySelector("#grid");
-  // delete all inner nodes
-  grid.innerHTML = "";
-
-  //let searchedCards= []
-  window.stewards.forEach((steward) => {
-    matchedCards.forEach((stewardUsername) => {
-      if(steward['gitcoin_username'] == stewardUsername){
-        grid.appendChild(steward);
-      }    
-      else {
-        console.log('didnt match');
-    }
-    })
-  })
-  
-  /*
-  searchedCards.forEach((card) => {
-    grid.appendChild(card);
-  })
-  //searchedCards= [];
-  **/
 }
 
 function orderStewards() {
@@ -235,10 +179,18 @@ function draw() {
 
     clone.querySelector("#workstream_url").href = "TBD";
 
-    clone.querySelector("#votingweight").innerHTML = steward.voting_weight+ "%";
-
+    if (steward.voting_weight == 0) {
+      clone.querySelector("#votingweight").innerHTML = "N/A";
+  }
+    else {clone.querySelector("#votingweight").innerHTML = steward.voting_weight+ "%";
+  }
+    
     // wrap in if condition for 30d/lifetime
-    clone.querySelector("#vote_participation").innerHTML = steward.vote_participation[timeVal]+ "%";
+    if (steward.vote_participation[timeVal] == 0) {
+      clone.querySelector("#vote_participation").innerHTML = "N/A";
+    }
+    else{clone.querySelector("#vote_participation").innerHTML = steward.vote_participation[timeVal]+ "%";
+  };
     // edge case of vote_participation["lifetime"] !=0 but for ["30d"] being =0, we use lifetime value instead
     // and show "-" for 30days for vote_participation (as feedback from Fred ser)
     if (timeVal == "30d") {
@@ -253,7 +205,12 @@ function draw() {
     clone.querySelector("#delegate_button").href = tally_url;
     clone.querySelector("#votingweight_url").href = tally_url;
 
-    clone.querySelector("#forum_post").innerHTML = steward.forum_activity[timeVal];
+    if (steward.forum_activity[timeVal] == 0) {
+      clone.querySelector("#forum_post").innerHTML = "N/A";
+    }
+    else{clone.querySelector("#forum_post").innerHTML = steward.forum_activity[timeVal];
+  }
+
     clone.querySelector("#forum_uri").href =
       "https://gov.gitcoin.co/u/" + steward.discourse_username;
 
@@ -319,15 +276,18 @@ function draw() {
       clone.querySelector("#votingweight").classList.remove("highlight");
     }
 
-    new_cards.push(clone)
+    grid.appendChild(clone);
+    //new_cards.push(clone)
     //document.querySelector("#grid").appendChild(clone);
   });
   //document.querySelector("#grid");
   //grid.innerHTML = "";
   //console.log(grid.innerHTML)
+  /*
   new_cards.forEach((card) => {
     document.querySelector("#grid").appendChild(card);
   })
   new_cards= []
+  */
 
 }
